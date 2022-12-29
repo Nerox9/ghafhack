@@ -1,4 +1,12 @@
 {
+  nixConfig = {
+    extra-substituters = [
+      "http://binarycache.vedenemo.dev"
+    ];
+    extra-trusted-public-keys = [
+      "binarycache.vedenemo.dev:Yclq5TKpx2vK7WVugbdP0jpln0/dPHrbUYfsH3UXIps="
+    ];
+  };
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
     flake-utils.url = "github:numtide/flake-utils";
