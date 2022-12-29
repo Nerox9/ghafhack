@@ -75,7 +75,7 @@
       ];
       makeVMs = { system }: {
         "${system}-netvm" = nixpkgs.lib.nixosSystem {
-          system = "${system}";
+          inherit system;
           modules = [
             microvm.nixosModules.microvm
             {
