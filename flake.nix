@@ -58,7 +58,7 @@
               }];
             };
             networks.microvm-eth0 = {
-              matchConfig.Name = "vm-*";
+              matchConfig.Name = "qemu*";
               networkConfig.Bridge = "virbr0";
             };
           };
@@ -82,14 +82,21 @@
               system.stateVersion = "22.11";
               networking.hostName = "netvm";
               users.users.root.password = "netvm";
-              networking.interfaces.eth0.useDHCP = true;
+              networking.useDHCP = true;
               microvm = {
                 # TODO: Add another interface
-                interfaces = [{
-                  type = "user";
-                  id = "qemu";
-                  mac = "02:00:00:01:01:01";
-                }];
+                interfaces = [
+                  {
+                    type = "user";
+                    id = "qemu0";
+                    mac = "02:00:00:01:01:01";
+                  }
+                  {
+                    type = "tap";
+                    id = "tap0";
+                    mac = "02:00:00:01:02:01";
+                  }
+                ];
                 volumes = [{
                   mountPoint = "/var";
                   image = "var.img";
@@ -97,7 +104,8 @@
                 }];
                 shares = [{
                   # use "virtiofs" for MicroVMs that are started by systemd
-                  proto = "9p";
+		  proto = "virtiofs";
+                  # proto = "9p";
                   tag = "ro-store";
                   # a host's /nix/store will be picked up so that the
                   # size of the /dev/vda can be reduced.
@@ -106,6 +114,7 @@
                 }];
                 socket = "control.socket";
                 # relevant for delarative MicroVM management
+                # hypervisor = "crosvm";
                 hypervisor = "qemu";
               };
             }
@@ -120,14 +129,21 @@
                 environment.systemPackages = [ pkgs.elinks ];
                 system.stateVersion = "22.11";
                 networking.hostName = "appvm-elinks";
-                networking.interfaces.eth0.useDHCP = true;
+                networking.useDHCP = true;
                 users.users.root.password = "elinks";
                 microvm = {
-                  interfaces = [{
-                    type = "user";
-                    id = "qemu";
-                    mac = "02:00:00:01:01:02";
-                  }];
+                  interfaces = [
+                    {
+                      type = "user";
+                      id = "qemu1";
+                      mac = "02:00:00:01:01:02";
+                    }
+                    # {
+                    #   type = "tap";
+                    #   id = "tap1";
+                    #   mac = "02:00:00:01:02:02";
+                    # }
+                  ];
                   volumes = [{
                     mountPoint = "/var";
                     image = "var.img";
@@ -135,7 +151,8 @@
                   }];
                   shares = [{
                     # use "virtiofs" for MicroVMs that are started by systemd
-                    proto = "9p";
+		    proto = "virtiofs";
+                    # proto = "9p";
                     tag = "ro-store";
                     # a host's /nix/store will be picked up so that the
                     # size of the /dev/vda can be reduced.
@@ -144,6 +161,7 @@
                   }];
                   socket = "control.socket";
                   # relevant for delarative MicroVM management
+                  # hypervisor = "crosvm";
                   hypervisor = "qemu";
                 };
               })
@@ -159,6 +177,7 @@
             let
               inherit (self.nixosConfigurations."${system}-netvm") config;
               # quickly build with another hypervisor if this MicroVM is built as a package
+              # hypervisor = "crosvm";
               hypervisor = "qemu";
             in
             config.microvm.runner.${hypervisor};
@@ -167,7 +186,8 @@
             let
               inherit (self.nixosConfigurations."${system}-appvm-elinks") config;
               # quickly build with another hypervisor if this MicroVM is built as a package
-              hypervisor = "qemu";
+              # hypervisor = "crosvm";
+	      hypervisor = "qemu";
             in
             config.microvm.runner.${hypervisor};
 
